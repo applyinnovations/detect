@@ -1,0 +1,111 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pete's Project</title>
+  </head>
+  <body>
+    <h1>Pete's Project</h1>
+    <p>
+      This is a simple WSGI-based web framework that uploads image file and
+      sends it to backend to save it on the uploads folder.
+    </p>
+
+    <h2>Upload an Image</h2>
+    <form id="uploadForm">
+      <label for="file">Choose an image to upload:</label>
+      <input type="file" id="file" name="file" accept="image/*" required />
+      <button type="submit">Upload Image</button>
+    </form>
+    <p id="uploadResult"></p>
+
+    <img
+      id="imagePreview"
+      src=""
+      alt="Image Preview"
+      style="display: none; max-width: 300px; max-height: 300px"
+    />
+
+    <h2>All Images</h2>
+    <button id="refreshImages">Refresh Images</button>
+    <div id="allImages"></div>
+
+    <script>
+      const refreshImages = async () => {
+        try {
+          const response = await fetch("/api/getImages", {
+            method: "GET",
+          });
+
+          console.log("these are the response", response);
+
+          const result = await response.json();
+          const allImagesDiv = document.getElementById("allImages");
+          allImagesDiv.innerHTML = ""; // Clear any existing images
+
+          result.images.forEach((image) => {
+            const imgElement = document.createElement("img");
+            imgElement.src = "data:image/png;base64," + image.data;
+            imgElement.alt = image.filename;
+            imgElement.style.maxWidth = "300px";
+            imgElement.style.maxHeight = "300px";
+            imgElement.style.margin = "5px";
+            allImagesDiv.appendChild(imgElement);
+          });
+        } catch (error) {
+          console.error("Error:", error);
+        }
+      };
+
+      document
+        .getElementById("file")
+        .addEventListener("change", function (event) {
+          const file = event.target.files[0];
+          if (file) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+              const imagePreview = document.getElementById("imagePreview");
+              imagePreview.src = e.target.result;
+              imagePreview.style.display = "block";
+            };
+            reader.readAsDataURL(file);
+          }
+        });
+
+      document
+        .getElementById("uploadForm")
+        .addEventListener("submit", async function (event) {
+          event.preventDefault(); // Prevent the default form submission
+
+          const formData = new FormData();
+          const fileInput = document.getElementById("file");
+          formData.append("file", fileInput.files[0]);
+
+          try {
+            const response = await fetch("/api/createImage", {
+              method: "POST",
+              body: formData,
+            });
+
+            const result = await response.json();
+            document.getElementById("uploadResult").innerText = result.message;
+            refreshImages();
+            const imagePreview = document.getElementById("imagePreview");
+            imagePreview.src = "";
+            imagePreview.style.display = "none";
+          } catch (error) {
+            console.error("Error:", error);
+            document.getElementById("uploadResult").innerText =
+              "An error occurred while uploading the image.";
+          }
+        });
+
+      refreshImages();
+
+      document
+        .getElementById("refreshImages")
+        .addEventListener("click", refreshImages);
+    </script>
+  </body>
+</html>
