@@ -1,4 +1,5 @@
 ﻿# myapp.py
+import threading
 from backend import Backend
 from server import Server
 import os
@@ -29,6 +30,16 @@ def index(environ):
     html_content = read_file('index.html')
     return html_content, 'text/html; charset=utf-8'
 
+@app.route('/sendVideo')
+def index(environ):
+    html_content = read_file('sendVideoStream.html')
+    return html_content, 'text/html; charset=utf-8'
+
+@app.route('/receiveVideo')
+def index(environ):
+    html_content = read_file('receieveVideoStream.html')
+    return html_content, 'text/html; charset=utf-8'
+
 @app.route('/api/createImage', methods=['POST'])
 def create_image(environ):
     form = cgi.FieldStorage(fp=environ['wsgi.input'], environ=environ, keep_blank_values=True)
@@ -53,5 +64,7 @@ def get_images(environ):
     return json.dumps(response).encode('utf-8'), 'application/json; charset=utf-8'
 
 server = Server(app, "uploads")
-
-server.start()
+  
+if __name__ == "__main__":
+      server.start()
+    

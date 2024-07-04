@@ -12,6 +12,7 @@ class Backend:
             return handler
         return wrapper
     
+    
 
     def __call__(self, environ, start_response:StartResponse):
         path = environ.get('PATH_INFO', '/')

@@ -1,0 +1,41 @@
+﻿<!-- viewer.html (receiver) -->
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Video Stream Viewer</title>
+  </head>
+  <body>
+    <h1>This is Streaming Client</h1>
+    <img id="videoStream" />
+
+    <script>
+      const img = document.getElementById("videoStream");
+      const ws = new WebSocket("ws://localhost:8765");
+      let lastUrl = null;
+
+      ws.onmessage = (event) => {
+        const blob = new Blob([event.data], { type: "image/jpeg" });
+        const url = URL.createObjectURL(blob);
+
+        // Only update the image source once the new image has loaded
+        const tempImg = new Image();
+        tempImg.onload = () => {
+          if (lastUrl) {
+            URL.revokeObjectURL(lastUrl);
+          }
+          img.src = url;
+          lastUrl = url;
+        };
+        tempImg.src = url;
+      };
+
+      ws.onopen = () => {
+        console.log("WebSocket connection opened");
+      };
+
+      ws.onclose = () => {
+        console.log("WebSocket connection closed");
+      };
+    </script>
+  </body>
+</html>
