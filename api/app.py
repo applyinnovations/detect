@@ -1,14 +1,28 @@
-﻿# myapp.py
-import threading
-from backend import Backend
-from server import Server
+﻿
+import sys
 import os
+
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(current_dir)
+sys.path.append(parent_dir)
+
+import asyncio
+import threading
+from common.router import Router
+from common.server import Server
+from ws.webSocketServer import WebSocketServer
+
 import glob
 import json
 import base64
 import cgi
+from dotenv import load_dotenv
 
-app = Backend()
+load_dotenv()
+
+app = Router()
+ws = WebSocketServer()
+
 
 def read_file(filepath):
     with open(filepath, 'rb') as file:
@@ -24,22 +38,7 @@ def read_image_files(folder_path):
 def encode_image_to_base64(filepath):
     with open(filepath, 'rb') as image_file:
         return base64.b64encode(image_file.read()).decode('utf-8')
-
-@app.route('/')
-def index(environ):
-    html_content = read_file('index.html')
-    return html_content, 'text/html; charset=utf-8'
-
-@app.route('/sendVideo')
-def index(environ):
-    html_content = read_file('sendVideoStream.html')
-    return html_content, 'text/html; charset=utf-8'
-
-@app.route('/receiveVideo')
-def index(environ):
-    html_content = read_file('receieveVideoStream.html')
-    return html_content, 'text/html; charset=utf-8'
-
+    
 @app.route('/api/createImage', methods=['POST'])
 def create_image(environ):
     form = cgi.FieldStorage(fp=environ['wsgi.input'], environ=environ, keep_blank_values=True)
@@ -58,13 +57,23 @@ def create_image(environ):
 
 @app.route('/api/getImages')
 def get_images(environ):
-    image_files = read_image_files('uploads')
+    file_path = os.path.join(os.path.dirname(__file__), 'uploads')
+    image_files = read_image_files(file_path)
     encoded_images = [{"filename": os.path.basename(image), "data": encode_image_to_base64(image)} for image in image_files]
     response = {"images": encoded_images}
     return json.dumps(response).encode('utf-8'), 'application/json; charset=utf-8'
 
-server = Server(app, "uploads")
-  
+
+
+server = Server(app, "uploads", os.environ['PORT'], os.environ['HOST'])
+
+def start_servers():
+    # Start the WSGI server
+    threading.Thread(target=server.start).start()
+
+    # Start the WebSocket server
+    asyncio.run(ws.start())
+
 if __name__ == "__main__":
-      server.start()
-    
+    start_servers()
+

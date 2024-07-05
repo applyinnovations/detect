@@ -2,12 +2,13 @@
 from wsgiref.types import StartResponse
 
 
-class Backend:
+class Router:
     def __init__(self):
         self.routes = {}
 
     def route(self, path, methods=['GET']):
         def wrapper(handler):
+            
             self.routes[path] = {'handler': handler, 'methods': methods}
             return handler
         return wrapper
