@@ -1,6 +1,11 @@
 ﻿
 import sys
 import os
+from PIL import Image, ImageDraw, ImageFont
+from wsgiref.types import StartResponse, WSGIApplication, WSGIEnvironment
+from typing import Callable, Optional
+
+import numpy as np
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(current_dir)
@@ -17,6 +22,9 @@ import json
 import base64
 import cgi
 from dotenv import load_dotenv
+import cv2
+from ultralytics import YOLO, settings
+
 
 load_dotenv()
 
@@ -55,17 +63,75 @@ def create_image(environ):
         response = {"message": "No file uploaded"}
         return json.dumps(response).encode('utf-8'), 'application/json; charset=utf-8'
 
+model = YOLO("yolov8n.pt")
+
+def draw_boxes(image, results):
+    draw = ImageDraw.Draw(image)
+    font = ImageFont.load_default()
+    
+    for result in results:
+        for *box, conf, cls in result:
+            x1, y1, x2, y2 = map(int, box)
+            draw.rectangle([x1, y1, x2, y2], outline="red", width=2)
+            draw.text((x1, y1), f'{model.names[int(cls)]} {conf:.2f}', fill="red", font=font)
+    return image
+
 @app.route('/api/getImages')
 def get_images(environ):
-    file_path = os.path.join(os.path.dirname(__file__), 'uploads')
-    image_files = read_image_files(file_path)
-    encoded_images = [{"filename": os.path.basename(image), "data": encode_image_to_base64(image)} for image in image_files]
+    try:
+        file_path = os.path.join(os.path.dirname(__file__), 'uploads')
+        image_files = read_image_files(file_path)
+        
+        encoded_images = []
+
+        for index, image_file in enumerate(image_files):
+            image = Image.open(image_file)
+            
+            image_np = np.array(image)
+            settings.update()
+            results = model(image_np, save=True )
+            
+            
+            imagePath = f"{results[0].save_dir}/{results[0].path}"
+            
+            file_path = os.path.join(os.path.dirname(__file__), 'uploads')
+            encoded_image = encode_image_to_base64(imagePath)
+            
+     
+            
+            # Add to the list of encoded images
+            encoded_images.append({
+                "filename": os.path.basename(image_file),
+                "data": encoded_image
+            })
+    except Exception as inst:
+        print('error', inst)
+        return  json.dumps({"status": 500, "message": "fail"}).encode('utf-8'), 'application/json; charset=utf-8'
+
     response = {"images": encoded_images}
     return json.dumps(response).encode('utf-8'), 'application/json; charset=utf-8'
+    
+
+
+def cors_middleware(app: WSGIApplication):
+    def middleware(environ: WSGIEnvironment, start_response: StartResponse):
+        def custom_start_response(status, headers, exc_info=None):
+            headers.append(('Access-Control-Allow-Origin', '*'))
+            return start_response(status, headers, exc_info)
+
+        if environ['REQUEST_METHOD'] == 'OPTIONS':
+            start_response('204 No Content', [('Access-Control-Allow-Origin', '*'),
+                                              ('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS'),
+                                              ('Access-Control-Allow-Headers', 'Content-Type')])
+            return [b'']
+        return app(environ, custom_start_response)
+    return middleware
+
+server = Server(app, "uploads", os.environ['PORT'], os.environ['HOST'], middleware=cors_middleware)
 
 
 
-server = Server(app, "uploads", os.environ['PORT'], os.environ['HOST'])
+
 
 def start_servers():
     # Start the WSGI server

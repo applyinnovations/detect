@@ -1,2 +1,4 @@
 ﻿websockets
 python-dotenv
+opencv-python
+ultralytics
