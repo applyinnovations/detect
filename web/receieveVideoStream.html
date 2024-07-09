@@ -14,8 +14,9 @@
       let lastUrl = null;
 
       ws.onmessage = (event) => {
+        console.log("message received");
         const blob = new Blob([event.data], { type: "image/jpeg" });
-        const url = URL.createObjectURL(blob);
+        const url = "data:image/png;base64," + event.data;
 
         // Only update the image source once the new image has loaded
         const tempImg = new Image();

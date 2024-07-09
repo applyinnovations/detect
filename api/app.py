@@ -88,10 +88,9 @@ def get_images(environ):
             image = Image.open(image_file)
             
             image_np = np.array(image)
-            settings.update()
+            
             results = model(image_np, save=True )
-            
-            
+        
             imagePath = f"{results[0].save_dir}/{results[0].path}"
             
             file_path = os.path.join(os.path.dirname(__file__), 'uploads')

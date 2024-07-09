@@ -34,6 +34,7 @@
         canvas.height = video.videoHeight;
 
         function sendFrame() {
+          console.log("sending message");
           context.drawImage(video, 0, 0, canvas.width, canvas.height);
           canvas.toBlob((blob) => {
             ws.send(blob);
@@ -42,7 +43,7 @@
 
         setInterval(() => {
           sendFrame();
-        }, 10); // Send frames every 100ms
+        }, 300); // Send frames every 100ms
       });
 
       ws.onopen = (websocket) => {
