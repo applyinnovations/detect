@@ -9,6 +9,11 @@
     build:
       context: ./web
       dockerfile: Dockerfile
+    develop:
+      watch:
+        - path: ./web
+          target: /web
+          action: sync+restart
     ports:
       - "3000:3000"
     depends_on:
@@ -18,6 +23,11 @@
     build:
       context: ./api
       dockerfile: Dockerfile
+    develop:
+      watch:
+        - path: ./api
+          target: /api
+          action: sync+restart
     ports:
       - "8080:8080"
       - "8765:8765"

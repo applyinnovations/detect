@@ -5,17 +5,22 @@
     <title>Webcam Stream</title>
   </head>
   <body>
-    <h1>Streaming Host</h1>
-    <h2 id="user_id"></h2>
-    <video id="video" autoplay></video>
+    <div style="display: flex; flex: 1; flex-direction: row">
+      <div style="display: flex">
+        <h1>Original Video Broadcase</h1>
+        <video id="video" autoplay></video>
+      </div>
+      <div style="display: flex">
+        <h1>Object Detected Video</h1>
+        <img id="videoStream" />
+      </div>
+    </div>
 
     <script>
       const video = document.getElementById("video");
       const canvas = document.createElement("canvas");
       const ws = new WebSocket("ws://localhost:8765");
       const userIdElement = document.getElementById("user_id");
-      const userId = (Math.random() + 1).toString(36).substring(2);
-      userIdElement.innerHTML = `ID: ${userId}`;
 
       // Access the webcam
       navigator.mediaDevices
@@ -52,6 +57,26 @@
 
       ws.onclose = () => {
         console.log("WebSocket connection closed");
+      };
+
+      const img = document.getElementById("videoStream");
+      let lastUrl = null;
+
+      ws.onmessage = (event) => {
+        console.log("message received");
+        const blob = new Blob([event.data], { type: "image/jpeg" });
+        const url = "data:image/png;base64," + event.data;
+
+        // Only update the image source once the new image has loaded
+        const tempImg = new Image();
+        tempImg.onload = () => {
+          if (lastUrl) {
+            URL.revokeObjectURL(lastUrl);
+          }
+          img.src = url;
+          lastUrl = url;
+        };
+        tempImg.src = url;
       };
     </script>
   </body>

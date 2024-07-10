@@ -22,7 +22,6 @@ import json
 import base64
 import cgi
 from dotenv import load_dotenv
-import cv2
 from ultralytics import YOLO, settings
 
 
@@ -49,6 +48,7 @@ def encode_image_to_base64(filepath):
     
 @app.route('/api/createImage', methods=['POST'])
 def create_image(environ):
+   # TODO to replace with multipart library
     form = cgi.FieldStorage(fp=environ['wsgi.input'], environ=environ, keep_blank_values=True)
     file_item = form['file']
     
@@ -141,4 +141,3 @@ def start_servers():
 
 if __name__ == "__main__":
     start_servers()
-

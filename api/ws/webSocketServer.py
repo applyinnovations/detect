@@ -5,10 +5,10 @@ import base64
 import io
 import os
 import shutil
+import cv2
 from websockets import WebSocketServerProtocol
 from websockets.server import serve
-from PIL import Image, ImageDraw, ImageFont
-import numpy as np
+from PIL import Image
 from ultralytics import YOLO, settings
 
 
