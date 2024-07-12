@@ -9,7 +9,7 @@
           target: /web
           action: sync+restart
     networks:
-      - cicd_proxy
+      - proxy
 
   detect-api:
     build:
@@ -21,7 +21,7 @@
           target: /api
           action: sync+restart
     networks:
-      - cicd_proxy
+      - proxy
 
 networks:
   proxy:
