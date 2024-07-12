@@ -128,10 +128,6 @@ def cors_middleware(app: WSGIApplication):
 
 server = Server(app, "uploads", 80, '0.0.0.0', middleware=cors_middleware)
 
-
-
-
-
 def start_servers():
     # Start the WSGI server
     threading.Thread(target=server.start).start()
