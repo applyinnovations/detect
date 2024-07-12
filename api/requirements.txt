@@ -1,6 +1,4 @@
 ﻿websockets
 python-dotenv
 opencv-python-headless
-python-multipart
 ultralytics
-reloadium
