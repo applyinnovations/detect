@@ -1,9 +1,9 @@
 ﻿
 import sys
 import os
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image
 from wsgiref.types import StartResponse, WSGIApplication, WSGIEnvironment
-from typing import Callable, Optional
+
 
 import numpy as np
 
@@ -65,17 +65,6 @@ def create_image(environ):
 
 model = YOLO("yolov8n.pt")
 
-def draw_boxes(image, results):
-    draw = ImageDraw.Draw(image)
-    font = ImageFont.load_default()
-    
-    for result in results:
-        for *box, conf, cls in result:
-            x1, y1, x2, y2 = map(int, box)
-            draw.rectangle([x1, y1, x2, y2], outline="red", width=2)
-            draw.text((x1, y1), f'{model.names[int(cls)]} {conf:.2f}', fill="red", font=font)
-    return image
-
 @app.route('/api/getImages')
 def get_images(environ):
     try:
@@ -127,10 +116,6 @@ def cors_middleware(app: WSGIApplication):
     return middleware
 
 server = Server(app, "uploads", os.environ['PORT'], os.environ['HOST'], middleware=cors_middleware)
-
-
-
-
 
 def start_servers():
     # Start the WSGI server

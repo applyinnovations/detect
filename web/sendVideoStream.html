@@ -1,16 +1,19 @@
-﻿<!-- index.html (sender) -->
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
   <head>
     <title>Webcam Stream</title>
   </head>
   <body>
     <div style="display: flex; flex: 1; flex-direction: row">
-      <div style="display: flex">
-        <h1>Original Video Broadcase</h1>
+      <div
+        style="display: flex; flex-direction: column; flex: 1; margin: 0 10px"
+      >
+        <h1>Original Video Broadcast</h1>
         <video id="video" autoplay></video>
       </div>
-      <div style="display: flex">
+      <div
+        style="display: flex; flex-direction: column; flex: 1; margin: 0 10px"
+      >
         <h1>Object Detected Video</h1>
         <img id="videoStream" />
       </div>
@@ -65,7 +68,8 @@
       ws.onmessage = (event) => {
         console.log("message received");
         const blob = new Blob([event.data], { type: "image/jpeg" });
-        const url = "data:image/png;base64," + event.data;
+        // const url = "data:image/png;base64," + event.data;
+        const url = URL.createObjectURL(blob);
 
         // Only update the image source once the new image has loaded
         const tempImg = new Image();

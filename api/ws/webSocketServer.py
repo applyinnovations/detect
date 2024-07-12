@@ -6,6 +6,7 @@ import io
 import os
 import shutil
 import cv2
+import numpy as np
 from websockets import WebSocketServerProtocol
 from websockets.server import serve
 from PIL import Image
@@ -36,39 +37,37 @@ class WebSocketServer:
         async with serve(self.handler,self.host, self.port):
             await asyncio.Future()  # run forever
 
-    async def process_image(self, image_blob):
-        # Convert the image blob to a PIL Image
-        image = Image.open(io.BytesIO(image_blob))
-        
-        # Save the image temporarily
-        
-        image.save(image_name)
-        
+    async def process_image(self, imageBlob):
         if(self.isDetectingObject):
-            return self.encode_image_to_base64(image_name)
-        # Perform object detection and get the base64 encoded image
-        processedImageSource = self.detectObject(image_name)
-
-        encodedImage = self.encode_image_to_base64(processedImageSource)
+            return imageBlob
         
+        processedImageSource = self.detectObject(imageBlob)
+
+        newBlobImage = self.pathToBlob(processedImageSource)
         
         shutil.rmtree(runsDirectory, ignore_errors=True)
         
-        
-        return encodedImage
+        return newBlobImage
     
-    def encode_image_to_base64(self, filepath):
+    def pathToBlob(self, filepath):
         with open(filepath, 'rb') as image_file:
-            return base64.b64encode(image_file.read()).decode('utf-8')
+            return image_file.read()
         
     def detectObject(self, originalImage):
         self.isDetectingObject = True
         settings.update({"runs_dir": runsDirectory})
+        image = Image.open(io.BytesIO(originalImage))
+        # with numpy
+        # nparr = np.frombuffer(originalImage, np.uint8)
+        # img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+        # image.save(image_name)
+        
         model = YOLO("yolov8n.pt")
         
-        results = model(originalImage, save=True )
+        results = model(image, save=True )
         
         imagePath = f"{results[0].save_dir}/{image_name}"
+                
         self.isDetectingObject = False
         return imagePath
     
