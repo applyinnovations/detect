@@ -126,7 +126,7 @@ def cors_middleware(app: WSGIApplication):
         return app(environ, custom_start_response)
     return middleware
 
-server = Server(app, "uploads", os.environ['PORT'], os.environ['HOST'], middleware=cors_middleware)
+server = Server(app, "uploads", 80, '0.0.0.0', middleware=cors_middleware)
 
 
 

@@ -1,8 +1,10 @@
-﻿FROM project_base
+﻿FROM python:3.12-slim
 
 WORKDIR /app
 
-COPY . /app/web/
+COPY ./common /app/common
+
+COPY ./web /app/web/
 
 RUN pip install -r /app/web/requirements.txt
 

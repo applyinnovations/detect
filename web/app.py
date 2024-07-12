@@ -51,7 +51,7 @@ def index(environ):
     html_content = read_file(file_path)
     return html_content, 'text/html; charset=utf-8'
 
-server = Server(app, "uploads", os.environ['PORT'], os.environ['HOST'])
+server = Server(app, "uploads", 80, '0.0.0.0')
 
 print(__name__)
 if __name__ == "__main__":

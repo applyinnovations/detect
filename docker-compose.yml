@@ -1,0 +1,29 @@
+﻿services:
+  detect:
+    build:
+      context: .
+      dockerfile: web.Dockerfile
+    develop:
+      watch:
+        - path: ./web
+          target: /web
+          action: sync+restart
+    networks:
+      - cicd_proxy
+
+  detect-api:
+    build:
+      context: .
+      dockerfile: api.Dockerfile
+    develop:
+      watch:
+        - path: ./api
+          target: /api
+          action: sync+restart
+    networks:
+      - cicd_proxy
+
+networks:
+  proxy:
+    name: cicd_proxy
+    external: true
