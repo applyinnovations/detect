@@ -17,7 +17,7 @@ image_name = "received_image.jpg"
 runsDirectory = os.path.join(os.path.dirname(__file__), 'runs')
 
 class WebSocketServer:
-    def __init__(self, host="0.0.0.0", port=8765):
+    def __init__(self, host="0.0.0.0", port=80):
         self.host = host
         self.port = int(port)
         self.isDetectingObject = False
