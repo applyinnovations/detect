@@ -1,4 +1,4 @@
-﻿websockets
+﻿aiohttp
 python-dotenv
 opencv-python-headless
 ultralytics

@@ -5,7 +5,6 @@ import base64
 import io
 import os
 import shutil
-import cv2
 from websockets import WebSocketServerProtocol
 from websockets.server import serve
 from PIL import Image
